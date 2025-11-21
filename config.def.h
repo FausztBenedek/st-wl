@@ -198,33 +198,33 @@ char *xdndescchar = " !\"#$&'()*;<>?[\\]^`{|}~";
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
-	/* 8 normal colors */
-	[0] = "#2d2d2d", /* black   */
-	[1] = "#f2777a", /* red     */
-	[2] = "#99cc99", /* green   */
-	[3] = "#ffcc66", /* yellow  */
-	[4] = "#6699cc", /* blue    */
-	[5] = "#cc99cc", /* magenta */
-	[6] = "#66cccc", /* cyan    */
-	[7] = "#d3d0c8", /* white   */
+    /* 8 normal colors */
+    [0] = "#191724", /* black   (base)       */
+    [1] = "#eb6f92", /* red     (love)       */
+    [2] = "#31748f", /* green   (foam)       */
+    [3] = "#f6c177", /* yellow  (gold)       */
+    [4] = "#9ccfd8", /* blue    (foam/iris)  */
+    [5] = "#c4a7e7", /* magenta (iris)       */
+    [6] = "#ebbcba", /* cyan    (rose)       */
+    [7] = "#e0def4", /* white   (text)       */
 
-	/* 8 bright colors */
-	[8]  = "#747369", /* black   */
-	[9]  = "#f2777a", /* red     */
-	[10] = "#99cc99", /* green   */
-	[11] = "#ffcc66", /* yellow  */
-	[12] = "#6699cc", /* blue    */
-	[13] = "#cc99cc", /* magenta */
-	[14] = "#66cccc", /* cyan    */
-	[15] = "#f2f0ec", /* white   */
+    /* 8 bright colors */
+    [8]  = "#6e6a86", /* bright black   (subtle) */
+    [9]  = "#eb6f92", /* bright red     */
+    [10] = "#31748f", /* bright green   */
+    [11] = "#f6c177", /* bright yellow  */
+    [12] = "#9ccfd8", /* bright blue    */
+    [13] = "#c4a7e7", /* bright magenta */
+    [14] = "#ebbcba", /* bright cyan    */
+    [15] = "#e0def4", /* bright white   */
 
-	[255] = 0,
+    [255] = 0,
 
-	/* more colors can be added after 255 to use with DefaultXX */
-	"#add8e6", /* 256 -> cursor */
-	"#555555", /* 257 -> rev cursor*/
-	"#300a24", /* 258 -> bg */
-	"#e5e5e5", /* 259 -> fg */
+    /* extra (cursor/bg/fg) */
+    "#ebbcba", /* 256 -> cursor */
+    "#524f67", /* 257 -> rev cursor */
+    "#191724", /* 258 -> bg */
+    "#e0def4", /* 259 -> fg */
 };
 
 

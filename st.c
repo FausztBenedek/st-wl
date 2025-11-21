@@ -684,94 +684,69 @@ selsnap(int *x, int *y, int direction)
 char *
 getsel(void)
 {
-	char *str, *ptr;
-	int y, bufsize, lastx, linelen;
-	const Glyph *gp, *last;
+    char *str, *ptr;
+    int y, bufsize, lastx, linelen;
+    const Glyph *gp, *last;
 
-	if (sel.ob.x == -1)
-		return NULL;
+    if (sel.ob.x == -1)
+        return NULL;
 
-	bufsize = (term.col+1) * (sel.ne.y-sel.nb.y+1) * UTF_SIZ;
-	ptr = str = xmalloc(bufsize);
+    bufsize = (term.col+1) * (sel.ne.y-sel.nb.y+1) * UTF_SIZ;
+    ptr = str = xmalloc(bufsize);
 
-	/* append every set & selected glyph to the selection */
-	for (y = sel.nb.y; y <= sel.ne.y; y++)
-	{
-		if ((linelen = tlinelen(y)) == 0) {
-			*ptr++ = '\n';
-			continue;
-		}
+    int ystart = sel.nb.y;
+    int yend   = sel.ne.y;
 
-		if (sel.type == SEL_RECTANGULAR) {
-			#if SCROLLBACK_PATCH
-			gp = &TLINE(y)[sel.nb.x];
-			#else
-			gp = &term.line[y][sel.nb.x];
-			#endif // SCROLLBACK_PATCH
-			lastx = sel.ne.x;
-		} else {
-			#if SCROLLBACK_PATCH
-			gp = &TLINE(y)[sel.nb.y == y ? sel.nb.x : 0];
-			#else
-			int x = sel.nb.x;
-			gp = &term.line[y][x];
-			if (sel.nb.y != y) {
-				// When in tmux, stop at the line DELIM
-				while(x && !IS_SNAP_LINE_DELIM(gp->u)) {
-					gp--;
-					x--;
-				}
-				if(IS_SNAP_LINE_DELIM(gp->u)) {
-					gp++;
-					x++;
-				}
-			}
-			if (sel.ne.y != y) {
-				lastx = sel.nb.x;
-				const Glyph *gptest = &term.line[y][lastx];
-				while((lastx<term.col-1) && !IS_SNAP_LINE_DELIM(gptest->u)) {
-					lastx++;
-					gptest++;
-				}
-				if(IS_SNAP_LINE_DELIM(gptest->u)) {
-					lastx--;
-				}
-			}
-			else
-				lastx = sel.ne.x;
-			#endif // SCROLLBACK_PATCH
-		}
+    if (ystart < 0)
+        ystart = 0;
+    if (yend >= term.row)
+        yend = term.row - 1;
 
-		#if SCROLLBACK_PATCH
-		last = &TLINE(y)[MIN(lastx, linelen-1)];
-		#else
-		last = &term.line[y][MIN(lastx, linelen-1)];
-		#endif // SCROLLBACK_PATCH
-		while (last >= gp && last->u == ' ')
-			--last;
+    for (y = ystart; y <= yend; y++) {
+        if ((linelen = tlinelen(y)) <= 0) {
+            *ptr++ = '\n';
+            continue;
+        }
 
-		for ( ; gp <= last; ++gp) {
-			if (gp->mode & ATTR_WDUMMY)
-				continue;
+        int startx;
+        if (sel.type == SEL_RECTANGULAR) {
+            startx = sel.nb.x;
+            lastx  = sel.ne.x;
+        } else {
+            startx = (sel.nb.y == y ? sel.nb.x : 0);
+            lastx  = (sel.ne.y == y) ? sel.ne.x : term.col - 1;
+        }
 
-			ptr += utf8encode(gp->u, ptr);
-		}
+        /* clamp to line bounds */
+        if (startx < 0)
+            startx = 0;
+        if (startx >= linelen)
+            startx = linelen - 1;
 
-		/*
-		 * Copy and pasting of line endings is inconsistent
-		 * in the inconsistent terminal and GUI world.
-		 * The best solution seems like to produce '\n' when
-		 * something is copied from st and convert '\n' to
-		 * '\r', when something to be pasted is received by
-		 * st.
-		 * FIXME: Fix the computer world.
-		 */
-		if ((y < sel.ne.y || lastx >= linelen)
-		    && (!(last->mode & ATTR_WRAP) || sel.type == SEL_RECTANGULAR))
-			*ptr++ = '\n';
-	}
-	*ptr = 0;
-	return str;
+        if (lastx < startx)
+            lastx = startx;
+        if (lastx >= linelen)
+            lastx = linelen - 1;
+
+        gp   = &term.line[y][startx];
+        last = &term.line[y][lastx];
+
+        while (last >= gp && last->u == ' ')
+            --last;
+
+        for (; gp <= last; ++gp) {
+            if (gp->mode & ATTR_WDUMMY)
+                continue;
+            ptr += utf8encode(gp->u, ptr);
+        }
+
+        if ((y < yend || lastx >= linelen) &&
+            (!(last->mode & ATTR_WRAP) || sel.type == SEL_RECTANGULAR))
+            *ptr++ = '\n';
+    }
+
+    *ptr = 0;
+    return str;
 }
 #endif // REFLOW_PATCH
 
