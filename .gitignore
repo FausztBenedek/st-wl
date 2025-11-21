@@ -10,3 +10,4 @@ xdg-decoration-protocol.c
 xdg-decoration-protocol.h
 options
 .deps
+result
